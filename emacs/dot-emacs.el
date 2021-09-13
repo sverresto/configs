@@ -1,3 +1,4 @@
+;; This installs 'use-package' automatically
 (require 'package)
 (add-to-list 'package-archives
              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
@@ -8,17 +9,6 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
-(use-package fill-column-indicator
-  :ensure
-  :config
-  (setq fill-column 72
-	fci-rule-width 1
-	fci-rule-color "darkblue")
-  (define-globalized-minor-mode global-fci-mode fci-mode
-    (lambda () (fci-mode 1)))
-  (global-fci-mode 1)
-  (hl-line-mode 1))
 
 (if (display-graphic-p)
     (progn
@@ -54,7 +44,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
+   '(flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -62,62 +52,62 @@
  ;; If there is more than one, they won't work right.
  )
 
-
-(use-package magithub
-  :ensure)
-
-(use-package dockerfile-mode
-  :ensure)
-
-(use-package color-theme-modern
-  :ensure
-  :config
-  (load-theme 'tango t t)
-  (enable-theme 'tango))
-
-;; edit filename at point
-(use-package dired-efap :ensure)
-
-(use-package company-ansible
-  :ensure)
-(use-package ansible
-  :ensure)
-
+(use-package dired-efap :ensure)      ;; edit filename at point
+(use-package flycheck :ensure)        ;; find errors on the fly
+(use-package magithub :ensure)
+(use-package dockerfile-mode :ensure)
+(use-package company-ansible :ensure)
+(use-package ansible :ensure)
 (use-package ansible-doc :ensure)
 (use-package ansible-vault :ensure)
-(use-package yaml-mode
-  :ensure
-  :config
-  :hook
-  (yaml-mode-hook . ansible))
-
 (use-package markdown-toc :ensure)
 (use-package markdown-mode :ensure)
-
-(use-package k8s-mode
- :ensure t
- :config
- (setq k8s-search-documentation-browser-function 'browse-url-firefox)
- :hook (k8s-mode . yas-minor-mode))
-
-;; yasnippet and some snippets
 (use-package yasnippet :ensure)
 (use-package yasnippet-snippets :ensure)
 (use-package go-snippets :ensure)
 
-(use-package dap-mode
-  :ensure)
+;; give a blue horisontal line when it is time to wrap
+(use-package fill-column-indicator
+  :ensure
+  :config
+  (setq fill-column 72
+	fci-rule-width 1
+	fci-rule-color "darkblue")
+  (define-globalized-minor-mode global-fci-mode fci-mode
+    (lambda () (fci-mode 1)))
+  (global-fci-mode 1)
+  (hl-line-mode 1))
 
-;; LSP & company
-(use-package lsp-ui
-  :ensure)
+(use-package yaml-mode
+  :ensure
+  :config
+  (setq company-dabbrev-downcase nil) ; expand camelCase
+  :hook
+  (yaml-mode-hook . ansible))
 
-;; need npm installed
+(use-package k8s-mode
+ :ensure
+ :config
+ (setq k8s-search-documentation-browser-function 'browse-url-firefox)
+ :hook
+ (k8s-mode . yas-minor-mode))
+
+;; Work in progress
+(use-package dap-mode :ensure) ;; 
+
+(use-package lsp-ui :ensure)
+
+;; Python LSP need npm installed
 (use-package lsp-pyright
   :ensure
   :config
-  (add-hook 'python-mode-hook #'lsp-deferred))
+  ;; (add-hook 'python-mode-hook #'yas-minor-mode)
+  ;;(add-hook 'python-mode-hook #'lsp-deferred))
+  :hook
+  (python-mode-hook . yas-minor-mode)
+  (python-mode-hook . lsp-deferred))
 
+;; LSP is using this
 (use-package company
   :ensure
   :bind
@@ -154,8 +144,12 @@
   :config
   (add-hook 'latex-mode-hook #'lsp-deferred)
   (add-hook 'latex-mode-hook #'yas-minor-mode))
+ 
+;; bash lsp server is too tough with my $PATH at least :-(
+;; (add-hook 'sh-mode-hook #'lsp-deferred)
+;; (add-hook 'sh-mode-hook #'yas-minor-mode)
 
-;; Get rid of varaible font size
+;; Get rid of annoying varaible font size
 (set-face-attribute 'lsp-signature-posframe nil :font "Inconsolata-17")
 (set-face-attribute 'lsp-signature-face nil :font "Inconsolata-17")
 (set-face-attribute 'fixed-pitch-serif nil :font "Inconsolata-17")
