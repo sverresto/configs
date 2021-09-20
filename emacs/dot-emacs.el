@@ -55,7 +55,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
+   '(pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -66,14 +66,21 @@
 (use-package dired-efap :ensure)      ;; edit filename at point
 (use-package flycheck :ensure)        ;; find errors on the fly
 (use-package magithub :ensure)
-(use-package dockerfile-mode :ensure)
-(use-package company-ansible :ensure)
+(use-package dockerfile-mode
+  :ensure
+  :config
+  (setq auto-mode-alist
+	(append '(("Dockerfile\\'" . dockerfile-mode)) auto-mode-alist)))
+(use-package company-ansible
+  :ensure
+  :config
+  (add-to-list 'company-backends 'company-ansible))
 (use-package ansible :ensure)
 (use-package ansible-doc :ensure)
 (use-package ansible-vault :ensure)
 (use-package markdown-toc :ensure)
 (use-package markdown-mode :ensure)
-(use-package yasnippet :ensure)
+(use-package yasnippet :ensure)9
 (use-package yasnippet-snippets :ensure)
 (use-package go-snippets :ensure)
 
@@ -85,6 +92,13 @@
 (use-package avy :ensure)
 (use-package which-key :ensure)
 (use-package helm-xref :ensure)
+(use-package plantuml-mode
+  :ensure
+  :config
+  (setq plantuml-exec-mode 'executable)
+  (setq auto-mode-alist
+	(append '(("\\.puml\\'" . plantuml-mode)) auto-mode-alist)))
+
 
 ;; give a blue horisontal line where it is time to wrap
 (use-package fill-column-indicator
@@ -110,8 +124,34 @@
  (setq k8s-search-documentation-browser-function 'browse-url-firefox)
  (add-hook 'k8s-mode #'yas-minor-mode))
 
+(use-package python-mode
+  :ensure
+  :after dap-mode
+  :config
+  (setq dap-python-debugger 'debugpy)
+  (require 'dap-python)
+
+
+  ;; (dap-register-debug-template "app"
+  ;; 			       (list :type "python"
+  ;; 				     :args "-i"
+  ;; 				     :cwd nil
+  ;; 				     :request "attach"
+  ;; 				     :name "app"))
+  
+  )
+
 ;; Work in progress
-(use-package dap-mode :ensure) ;; 
+(use-package dap-mode
+  :ensure
+  :after lsp-mode
+  :config
+  (setq dap-auto-configure-mode t)
+  (require 'dap-ui)
+  (dap-tooltip-mode t)
+  (tooltip-mode t)
+  :init
+  (dap-mode 1)) ;; 
 
 (use-package lsp-mode
   :ensure
