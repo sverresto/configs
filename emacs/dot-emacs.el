@@ -55,7 +55,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
+   '(zone-mode bind-mode pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -80,9 +80,14 @@
 (use-package ansible-vault :ensure)
 (use-package markdown-toc :ensure)
 (use-package markdown-mode :ensure)
-(use-package yasnippet :ensure)9
+(use-package yasnippet :ensure)
 (use-package yasnippet-snippets :ensure)
 (use-package go-snippets :ensure)
+(use-package dns-mode
+  :ensure
+  :config
+  (setq auto-mode-alist
+	(append '(("\\ik/dns/zones\\'" . dns-mode)) auto-mode-alist)))
 
 ;;bells and wistle for the LSP modes
 (use-package lsp-treemacs :ensure)
