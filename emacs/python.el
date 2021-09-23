@@ -51,6 +51,7 @@
 (use-package avy :ensure)
 (use-package which-key :ensure)
 (use-package helm-xref :ensure)
+(use-package iedit :ensure)
 
 ;; for python DAP install "debugpy
 ;; $ pip install debugpy
@@ -77,7 +78,11 @@
   :config
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
 
-(use-package lsp-ui :ensure)
+(use-package lsp-ui
+  :ensure
+  :config
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
 
 ;; Python LSP need npm installed
 (use-package lsp-pyright
@@ -109,7 +114,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(company lsp-pyright lsp-ui dap-mode python-mode lsp-treemacs yasnippet-snippets yasnippet flycheck use-package)))
+   '(iedit company lsp-pyright lsp-ui dap-mode python-mode lsp-treemacs yasnippet-snippets yasnippet flycheck use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

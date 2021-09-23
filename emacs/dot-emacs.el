@@ -55,7 +55,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
+   '(dap-go dap-ui pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -86,6 +86,7 @@
 
 ;;bells and wistle for the LSP modes
 (use-package lsp-treemacs :ensure)
+(use-package iedit :ensure) ;; edit multiple lines
 (use-package helm-lsp  :ensure)
 (use-package projectile :ensure)
 (use-package hydra :ensure)
@@ -129,17 +130,7 @@
   :after dap-mode
   :config
   (setq dap-python-debugger 'debugpy)
-  (require 'dap-python)
-
-
-  ;; (dap-register-debug-template "app"
-  ;; 			       (list :type "python"
-  ;; 				     :args "-i"
-  ;; 				     :cwd nil
-  ;; 				     :request "attach"
-  ;; 				     :name "app"))
-  
-  )
+  (require 'dap-python))
 
 ;; Work in progress
 (use-package dap-mode
@@ -158,7 +149,12 @@
   :config
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
 
-(use-package lsp-ui :ensure)
+(use-package lsp-ui
+  :ensure
+  :after lsp-mode
+  :config
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
 
 ;; Python LSP need npm installed
 (use-package lsp-pyright
@@ -184,11 +180,14 @@
   (setq company-minimum-prefix-length 1)
   (global-company-mode t))
 
+
 ;; LSP + golang
 ;; install gopls for your version of go. I use the dnf version.
+;; go install github.com/go-delve/delve/cmd/dlv@latest
 (use-package go-mode
   :ensure
   :config
+  (require 'dap-go)
   (defun lsp-go-install-save-hooks ()
     (add-hook 'before-save-hook #'lsp-format-buffer t t)
     (add-hook 'before-save-hook #'lsp-organize-imports t t))
