@@ -55,7 +55,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(zone-mode bind-mode pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
+   '(org-tree-slide org-babel-eval-in-repl dilbert sly rainbow-blocks rainbow-delimiters blamer quelpa kubernetes indent-guide iedit zone-mode bind-mode pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -219,3 +219,31 @@
 (set-face-attribute 'fixed-pitch-serif nil :font "Inconsolata-17")
 (set-face-attribute 'fixed-pitch nil :font "Inconsolata-17")
 
+(use-package kubernetes :ensure)
+
+; org
+(org-babel-do-load-languages
+ 'org-babel-load-languages '((python . t)
+			     (C . t)))
+
+(use-package org-tree-slide
+  :ensure
+  :config
+  (global-set-key (kbd "<f8>") 'org-tree-slide-mode)
+  (global-set-key (kbd "S-<f8>") 'org-tree-slide-skip-done-toggle)
+)
+
+;; cl
+(use-package rainbow-delimiters
+  :ensure
+  :config
+  (add-hook 'sly-mode-hook #'rainbow-delimiters-mode))
+(use-package rainbow-blocks
+  :ensure
+  :config
+  (add-hook 'sly-mode-hook #'rainbow-blocks-mode))
+(use-package sly
+  :ensure
+  :config
+  (add-to-list 'company-backends 'sly-company)
+  )
