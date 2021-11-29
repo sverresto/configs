@@ -1,6 +1,6 @@
 ;;; sverrest's .emacs file
 ;;
-;; This installs 'use-package' automatically
+;; This installs 'use-package' automagically
 (require 'package)
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
@@ -11,6 +11,8 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Some standard configuration
 (if (display-graphic-p)
@@ -37,34 +39,22 @@
       auth-sources '("~/.authinfo"))
 
 (setq lsp-ui-doc-show-with-cursor nil)
-;; (setq gc-cons-threshold (* 100 1024 1024)
-;;       read-process-output-max (* 1024 1024)
-;;       treemacs-space-between-root-nodes nil
-;;       company-idle-delay 0.0
-;;       company-minimum-prefix-length 1
-;;       lsp-idle-delay 0.1)  ;; clangd is fast
+(setq gc-cons-threshold (* 100 1024 1024)
+       read-process-output-max (* 1024 1024)
+       treemacs-space-between-root-nodes nil
+       company-idle-delay 0.0
+       company-minimum-prefix-length 1
+       lsp-idle-delay 0.1)
+(setq ispell-program-name 'hunspell)
 
 (set-face-attribute 'default nil
 		    :font "Inconsolata-17")
 
 (global-set-key (kbd "C-x p") 'previous-multiframe-window)
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(org-tree-slide org-babel-eval-in-repl dilbert sly rainbow-blocks rainbow-delimiters blamer quelpa kubernetes indent-guide iedit zone-mode bind-mode pyenv-mode pyenv dap-mode lsp-treemacs dockerfile-mode python-mode plantuml-mode lsp helm-xref projectile helm-lsp flycheck magithub lsp-pyright color-theme-modern k8s-mode company-ansible dired-efap yaml-mode ansible-vault ansible-doc ansible yasnippet-snippets lsp-latex dark-souls go-snippets yasnippet go-mode markdown-mode+ mardown-mode+ markdown-toc x company lsp-ui selectrum which-key use-package fill-column-indicator)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
 (use-package dired-efap :ensure)      ;; edit filename at point
 (use-package flycheck :ensure)        ;; find errors on the fly
+(use-package flycheck-aspell :ensure)
 (use-package magithub :ensure)
 (use-package dockerfile-mode
   :ensure
@@ -79,7 +69,12 @@
 (use-package ansible-doc :ensure)
 (use-package ansible-vault :ensure)
 (use-package markdown-toc :ensure)
-(use-package markdown-mode :ensure)
+;; sudo npm i -g unified-language-server
+(use-package markdown-mode
+  :ensure
+  :config
+  (add-hook 'markdown-mode-hook #'lsp-deferred)
+  )
 (use-package yasnippet :ensure)
 (use-package yasnippet-snippets :ensure)
 (use-package go-snippets :ensure)
@@ -97,6 +92,7 @@
 (use-package hydra :ensure)
 (use-package avy :ensure)
 (use-package which-key :ensure)
+(use-package xref :ensure)
 (use-package helm-xref :ensure)
 (use-package plantuml-mode
   :ensure
@@ -105,18 +101,18 @@
   (setq auto-mode-alist
 	(append '(("\\.puml\\'" . plantuml-mode)) auto-mode-alist)))
 
-
+;; This is messing up LSP
 ;; give a blue horisontal line where it is time to wrap
-(use-package fill-column-indicator
-  :ensure
-  :config
-  (setq fill-column 72
-	fci-rule-width 1
-	fci-rule-color "darkblue")
-  (define-globalized-minor-mode global-fci-mode fci-mode
-    (lambda () (fci-mode 1)))
-  (global-fci-mode 1)
-  (hl-line-mode 1))
+;; (use-package fill-column-indicator
+;;   :ensure
+;;   :config
+;;   (setq fill-column 72
+;; 	fci-rule-width 1
+;; 	fci-rule-color "darkblue")
+;;   (define-globalized-minor-mode global-fci-mode fci-mode
+;;     (lambda () (fci-mode 1)))
+;;   (global-fci-mode 1)
+;;   (hl-line-mode 1))
 
 (use-package yaml-mode
   :ensure
@@ -147,7 +143,7 @@
   (dap-tooltip-mode t)
   (tooltip-mode t)
   :init
-  (dap-mode 1)) ;; 
+  (dap-mode 1))
 
 (use-package lsp-mode
   :ensure
@@ -158,6 +154,13 @@
   :ensure
   :after lsp-mode
   :config
+  (setq lsp-ui-sideline-show-diagnostics t)
+  (setq lsp-ui-sideline-show-code-actions t)
+  (setq lsp-ui-sideline-show-hover t)
+  (setq lsp-ui-sideline-update-mode t)
+  (setq lsp-ui-peek-enable t)
+  (setq lsp-ui-peek-show-directory t)
+  (setq lsp-ui-imenu-enable t)
   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
 
@@ -181,10 +184,12 @@
   ;      ("<tab>". tab-indent-or-complete)
   ;      ("TAB". tab-indent-or-complete))
   :config
-  (setq company-idle-delay 0.3)
+  (setq company-idle-delay 0.5)
   (setq company-minimum-prefix-length 1)
   (global-company-mode t))
 
+(use-package company-statistics :ensure)
+(use-package company-go :ensure)
 
 ;; LSP + golang
 ;; install gopls for your version of go. I use the dnf version.
@@ -209,7 +214,7 @@
   (add-hook 'latex-mode-hook #'lsp-deferred)
   (add-hook 'latex-mode-hook #'yas-minor-mode))
  
-;; bash lsp server is too tough with my $PATH at least :-(
+;; bash lsp server is too tough with my $PATH and laptop at least :-(
 ;; (add-hook 'sh-mode-hook #'lsp-deferred)
 ;; (add-hook 'sh-mode-hook #'yas-minor-mode)
 
@@ -233,17 +238,3 @@
   (global-set-key (kbd "S-<f8>") 'org-tree-slide-skip-done-toggle)
 )
 
-;; cl
-(use-package rainbow-delimiters
-  :ensure
-  :config
-  (add-hook 'sly-mode-hook #'rainbow-delimiters-mode))
-(use-package rainbow-blocks
-  :ensure
-  :config
-  (add-hook 'sly-mode-hook #'rainbow-blocks-mode))
-(use-package sly
-  :ensure
-  :config
-  (add-to-list 'company-backends 'sly-company)
-  )
